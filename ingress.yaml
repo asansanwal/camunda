@@ -1,0 +1,96 @@
+# Chart values for the Camunda Platform 8 Helm chart in combined Ingress setup.
+
+# This file deliberately contains only the values that differ from the defaults.
+# For changes and documentation, use your favorite diff tool to compare it with:
+# https://github.com/camunda/camunda-platform-helm/blob/main/charts/camunda-platform
+
+# IMPORTANT: Make sure to change "camunda.example.com" to your domain.
+
+global:
+  ingress:
+    enabled: true
+    className: nginx
+    host: "camunda.dosvak.org"
+    tls:
+      # Ingress.tls.enabled if true, then tls is configured on the ingress resource. If enabled the Ingress.host need to be defined.
+      enabled: false
+      # Ingress.tls.secretName defines the secret name which contains the TLS private key and certificate
+      secretName: "mycert"
+  identity:
+    auth:
+      publicIssuerUrl: "https://camunda.dosvak.org/auth/realms/camunda-platform"
+      operate:
+        redirectUrl: "http://camunda.dosvak.org/operate"
+      tasklist:
+        redirectUrl: "http://camunda.dosvak.org/tasklist"
+      optimize:
+        redirectUrl: "http://camunda.dosvak.org/optimize"
+      webModeler:
+        redirectUrl: "http://camunda.dosvak.org/modeler"
+
+identity:
+  contextPath: "/identity"
+  fullURL: "https://camunda.dosvak.org/identity"
+  # Keycloak configuration, for the keycloak dependency chart which is used by identity
+  keycloak: # see: http://github.com/bitnami/charts/tree/master/bitnami/keycloak#parameters
+    ingress: # see: http://www.keycloak.org/server/reverseproxy
+      enabled: true
+      ingressClassName: nginx
+      hostname: "camunda.dosvak.org"
+    extraEnvVars: # see: http://github.com/bitnami/bitnami-docker-keycloak#configuration
+      - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
+        value: "true"
+      - name: KEYCLOAK_EXTRA_ARGS
+        value: "-Dkeycloak.frontendUrl=https://camunda.dosvak.org/auth"
+operate:
+  contextPath: "/operate"
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      ingress.kubernetes.io/rewrite-target:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    path: /
+    host: "camunda.dosvak.org"
+    tls:
+      enabled: false
+      secretName: ""
+
+optimize:
+  contextPath: "/optimize"
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      ingress.kubernetes.io/rewrite-target:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    path: /
+    host: "camunda.dosvak.org"
+    tls:
+      enabled: false
+      secretName: ""
+
+tasklist:
+  contextPath: "/tasklist"
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      ingress.kubernetes.io/rewrite-target:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    path: /
+    host: "camunda.dosvak.org"
+    tls:
+      enabled: false
+      secretName: ""
+
+webModeler:
+  # The context path is used for the web application that will be accessed by users in the browser.
+  # In addition, a WebSocket endpoint will be exposed on "[contextPath]-ws", e.g. "/modeler-ws".
+  contextPath: "/modeler"
+
+zeebe-gateway:
+  ingress:
+    enabled: true
+    className: nginx
+    host: "zeebe.camunda.dosvak.org"

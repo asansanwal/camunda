@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: camunda-zeebe-gateway-lb
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 9600
+    protocol: TCP
+    targetPort: 9600
+  - name: gateway
+    port: 26500
+    protocol: TCP
+    targetPort: 26500
+  selector:
+    app: camunda-platform
+    app.kubernetes.io/component: zeebe-gateway
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zeebe-gateway
+    app.kubernetes.io/part-of: camunda-platform
+  type: LoadBalancer
